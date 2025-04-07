@@ -1,0 +1,1569 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculate your Indian Income Tax for FY 2024-25 (AY 2025-26) under both Old and New Regimes. Features real-time calculation, regime comparison, deductions (80C, 80D, HRA, etc.), dark mode, chart, and PDF report. Accurate and responsive.">
+    <meta name="keywords" content="income tax calculator, india, tax calculator 2024-25, ay 2025-26, old regime, new regime, tax calculation, fy 2024-25, assessment year 2025-26, deductions, 80c, 80d, hra, standard deduction, home loan interest, tax slabs, cess, rebate 87a, surcharge">
+    <title id="title">Indian Income Tax Calculator (FY 2024-25)</title>
+
+    <style>
+        /* --- Base Styles & Variables --- */
+        :root {
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+            --border-radius: 6px;
+            --transition-speed: 0.3s;
+
+            /* Light Mode (Default) */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --card-border: #dee2e6;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --input-focus-border: #86b7fe;
+            --input-focus-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            --primary-color: #0d6efd;
+            --primary-text: #ffffff;
+            --secondary-color: #6c757d;
+            --secondary-text: #ffffff;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --muted-text: #6c757d;
+            --link-color: #0d6efd;
+            --tooltip-bg: #343a40;
+            --tooltip-text: #f8f9fa;
+            --chart-bar-old: #ffc107; /* Yellowish */
+            --chart-bar-new: #0dcaf0; /* Cyan */
+            --chart-text: #495057;
+        }
+
+        html.dark-mode {
+            --bg-color: #212529;
+            --text-color: #dee2e6;
+            --card-bg: #343a40;
+            --card-border: #495057;
+            --input-bg: #495057;
+            --input-border: #6c757d;
+            --input-focus-border: #4dabf7;
+            --input-focus-shadow: 0 0 0 0.25rem rgba(77, 171, 247, 0.25);
+            --primary-color: #4dabf7; /* Lighter blue */
+            --primary-text: #212529;
+            --secondary-color: #adb5bd;
+            --secondary-text: #212529;
+            --success-color: #40c057; /* Lighter green */
+            --warning-color: #ffdd57; /* Lighter yellow */
+            --danger-color: #ff6b6b;  /* Lighter red */
+            --muted-text: #adb5bd;
+            --link-color: #4dabf7;
+            --tooltip-bg: #f8f9fa;
+            --tooltip-text: #212529;
+            --chart-bar-old: #ffdd57;
+            --chart-bar-new: #66d9e8;
+            --chart-text: #adb5bd;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px; /* Base font size */
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        header h1 {
+            font-size: 1.5rem; /* Responsive font size */
+            margin: 0;
+            color: var(--primary-color);
+            transition: color var(--transition-speed);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .control-button, .language-select {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--input-border);
+            border-radius: var(--border-radius);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .control-button:hover, .language-select:hover {
+            background-color: var(--input-bg);
+            border-color: var(--input-focus-border);
+        }
+
+        /* --- Sections & Cards --- */
+        section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.5rem;
+        }
+
+        /* --- Form Elements --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative; /* For tooltips */
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .form-group input[type="number"],
+        .form-group select {
+            padding: 0.7rem 0.8rem;
+            border: 1px solid var(--input-border);
+            border-radius: var(--border-radius);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            width: 100%;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed), background-color var(--transition-speed), color var(--transition-speed);
+            -moz-appearance: textfield; /* Firefox */
+        }
+         .form-group input[type="number"]::-webkit-outer-spin-button,
+         .form-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: var(--input-focus-shadow);
+        }
+
+        .form-group input::placeholder {
+            color: var(--muted-text);
+            opacity: 0.7;
+        }
+
+        .input-prefix {
+            position: absolute;
+            left: 10px;
+            top: 60%; /* Adjust as needed */
+            transform: translateY(-50%);
+            color: var(--muted-text);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .form-group input.prefixed {
+            padding-left: 2rem; /* Space for prefix */
+        }
+
+        /* --- Tooltips --- */
+        .tooltip-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: var(--secondary-color);
+            color: var(--secondary-text);
+            border-radius: 50%;
+            text-align: center;
+            font-size: 11px;
+            line-height: 16px;
+            cursor: help;
+            position: relative;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--tooltip-bg);
+            color: var(--tooltip-text);
+            text-align: center;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%; /* Position above the icon */
+            left: 50%;
+            margin-left: -110px; /* Center the tooltip */
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+            font-size: 0.85rem;
+            font-weight: normal;
+            line-height: 1.4;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .tooltip-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- Regime Specific Fields --- */
+        .old-regime-fields, .new-regime-fields {
+            border-left: 3px solid var(--secondary-color);
+            padding-left: 1rem;
+            margin-top: 1rem;
+            display: none; /* Hidden by default, shown by JS */
+        }
+        .old-regime-fields.active, .new-regime-fields.active {
+            display: block;
+        }
+        .old-regime-fields { border-color: var(--chart-bar-old); }
+        .new-regime-fields { border-color: var(--chart-bar-new); }
+
+        /* --- Output Section --- */
+        #output-section {
+             animation-delay: 0.1s;
+        }
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .output-item {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--card-border);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        .output-item h3 {
+            font-size: 0.9rem;
+            color: var(--muted-text);
+            margin-bottom: 0.5rem;
+            font-weight: normal;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .output-value {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-family: var(--font-mono);
+            word-wrap: break-word;
+        }
+
+        .output-value.positive { color: var(--danger-color); }
+        .output-value.negative { color: var(--success-color); } /* Refund */
+        .output-value.neutral { color: var(--primary-color); }
+
+        .tax-breakdown {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--muted-text);
+        }
+         .tax-breakdown table {
+            width: 100%;
+            margin-top: 0.5rem;
+            border-collapse: collapse;
+        }
+        .tax-breakdown th, .tax-breakdown td {
+            text-align: left;
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--card-border);
+        }
+         .tax-breakdown th { font-weight: 600; color: var(--text-color);}
+        .tax-breakdown td:last-child { text-align: right; font-family: var(--font-mono);}
+
+
+        #regimeSuggestion {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-align: center;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border var(--transition-speed);
+        }
+
+        #regimeSuggestion.old {
+            background-color: var(--warning-color);
+            color: #333; /* Ensure readability on yellow */
+            border: 1px solid darken(var(--warning-color), 10%);
+        }
+        html.dark-mode #regimeSuggestion.old {
+             background-color: #a67c00;
+             color: #fff;
+        }
+
+        #regimeSuggestion.new {
+            background-color: #0dcaf0; /* Cyan */
+             color: #333;
+             border: 1px solid darken(#0dcaf0, 10%);
+        }
+        html.dark-mode #regimeSuggestion.new {
+            background-color: #0a8ea3;
+            color: #fff;
+        }
+        #regimeSuggestion.equal {
+            background-color: var(--secondary-color);
+            color: var(--secondary-text);
+             border: 1px solid darken(var(--secondary-color), 10%);
+        }
+
+
+        /* --- Chart Section --- */
+         #chart-section {
+             animation-delay: 0.2s;
+        }
+        #taxChartContainer {
+            margin-top: 1rem;
+            position: relative;
+            min-height: 250px; /* Ensure space for chart */
+            background-color: var(--bg-color);
+             padding: 1rem;
+             border-radius: var(--border-radius);
+        }
+        #taxChart {
+            display: block;
+            width: 100%;
+            height: 250px; /* Fixed height */
+        }
+
+        /* SVG Chart Styles */
+        .chart-bar {
+            transition: all 0.3s ease-in-out;
+        }
+        .chart-bar.old { fill: var(--chart-bar-old); }
+        .chart-bar.new { fill: var(--chart-bar-new); }
+        .chart-text {
+            font-size: 10px;
+            fill: var(--chart-text);
+            text-anchor: middle;
+        }
+        .chart-axis {
+             stroke: var(--input-border);
+             stroke-width: 1;
+        }
+
+        /* --- Actions Section --- */
+        #actions-section {
+             animation-delay: 0.3s;
+             background: none;
+             border: none;
+             box-shadow: none;
+             padding: 0;
+             text-align: center;
+        }
+        .action-button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--success-color);
+            color: var(--primary-text);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .action-button:hover {
+            background-color: darken(var(--success-color), 10%);
+            transform: translateY(-2px);
+        }
+         html.dark-mode .action-button {
+            background-color: #40c057;
+            color: #212529;
+         }
+         html.dark-mode .action-button:hover {
+             background-color: #37b24d;
+         }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.85rem;
+            color: var(--muted-text);
+        }
+        footer a { color: var(--link-color); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* --- Responsiveness --- */
+        @media (max-width: 768px) {
+            html { font-size: 15px; }
+            header { flex-direction: column; align-items: flex-start; }
+            header h1 { font-size: 1.3rem; }
+            .container { padding: 0 0.5rem; }
+             section { padding: 1rem; }
+             .form-grid { grid-template-columns: 1fr; gap: 1rem;} /* Stack form elements */
+             .output-grid { grid-template-columns: 1fr; gap: 0.8rem;}
+             .output-value { font-size: 1.2rem; }
+        }
+        @media (max-width: 480px) {
+            html { font-size: 14px; }
+            header h1 { font-size: 1.2rem; }
+            .header-controls { flex-wrap: wrap; } /* Wrap controls if needed */
+            section { padding: 0.8rem; }
+        }
+
+        /* --- Print Styles for PDF --- */
+        @media print {
+            body {
+                padding: 0;
+                background-color: #ffffff !important; /* Ensure white background for print */
+                color: #000000 !important; /* Ensure black text */
+                 -webkit-print-color-adjust: exact; /* Force background colors/images in Chrome/Safari */
+                 print-color-adjust: exact; /* Standard */
+            }
+            html, body { font-size: 10pt; }
+            header, footer, #actions-section, .header-controls, #chart-section, .tooltip-icon, #fy-selector-group {
+                display: none !important; /* Hide non-report elements */
+            }
+            .container {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 1cm !important;
+                 box-shadow: none !important;
+                 border: none !important;
+            }
+            section {
+                 box-shadow: none !important;
+                 border: 1px solid #ccc !important;
+                 padding: 0.8cm !important;
+                 margin-bottom: 1cm !important;
+                 page-break-inside: avoid !important; /* Avoid breaking sections */
+                 opacity: 1 !important; /* Ensure visible */
+                 transform: none !important; /* Reset animation */
+                 background-color: #ffffff !important;
+            }
+             section h2 {
+                 font-size: 14pt !important;
+                 color: #000000 !important;
+                 border-bottom: 1px solid #000 !important;
+             }
+             .form-grid, .output-grid { grid-template-columns: 1fr !important; } /* Single column layout */
+
+             .output-item { border: 1px solid #eee !important; background: #f9f9f9 !important; }
+             .output-value { font-size: 12pt !important; color: #000 !important; }
+             .output-item h3 { color: #555 !important; }
+             .tax-breakdown { color: #333 !important; font-size: 9pt !important;}
+             .tax-breakdown th, .tax-breakdown td { border-bottom: 1px solid #eee !important; }
+             .tax-breakdown th { color: #000 !important; }
+             #regimeSuggestion { border: 1px solid #000 !important; padding: 0.5cm !important; }
+             #regimeSuggestion.old { background-color: #ffeeba !important; color: #000 !important;}
+             #regimeSuggestion.new { background-color: #cff4fc !important; color: #000 !important;}
+             #regimeSuggestion.equal { background-color: #e2e3e5 !important; color: #000 !important;}
+
+            #print-report-content { display: block !important; } /* Show only the prepared print content */
+            #input-section, #output-section { display: block !important; } /* Ensure main sections are printed */
+
+            a { text-decoration: none; color: #000 !important; }
+            a[href]:after { content: none !important; } /* Don't show URLs */
+
+            /* Ensure variables don't interfere in print mode if !important isn't enough */
+            :root, html.dark-mode {
+                 --bg-color: #ffffff !important;
+                 --text-color: #000000 !important;
+                 --card-bg: #ffffff !important;
+                 --card-border: #cccccc !important;
+                 --primary-color: #000000 !important;
+                 --muted-text: #555555 !important;
+                 /* Reset others as needed */
+            }
+        }
+
+        /* Hidden element to hold print-specific content if needed, though direct print of sections is better */
+         #print-report-content { display: none; }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="mainTitle">🇮🇳 Indian Income Tax Calculator (FY 2024-25)</h1>
+        <div class="header-controls">
+             <div class="form-group" id="fy-selector-group" style="margin-bottom: 0;">
+                <label for="financialYear" data-lang-key="financialYearLabel">Financial Year:</label>
+                <select id="financialYear" class="language-select">
+                    <option value="2024-25" selected>2024-25 (AY 2025-26)</option>
+                    </select>
+            </div>
+            <select id="languageSelector" class="language-select" title="Select Language">
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+            </select>
+            <button id="darkModeToggle" class="control-button" data-lang-key="toggleTheme">🌙 Dark Mode</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="input-section">
+            <h2 data-lang-key="inputTitle">Enter Your Details</h2>
+            <form id="taxForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="annualIncome" data-lang-key="annualIncomeLabel">
+                            Total Annual Income
+                            <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="annualIncomeTooltip">Enter your gross annual income from all sources (Salary, Business, Other Sources) before any deductions. Standard Deduction will be applied automatically where applicable.</span></span>
+                        </label>
+                        <span class="input-prefix">₹</span>
+                        <input type="number" id="annualIncome" class="prefixed" placeholder="e.g., 1200000" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ageGroup" data-lang-key="ageGroupLabel">
+                            Age Group
+                            <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="ageGroupTooltip">Tax slabs differ based on age only in the Old Regime. Below 60 (Normal), 60-79 (Senior Citizen), 80+ (Super Senior Citizen).</span></span>
+                        </label>
+                        <select id="ageGroup">
+                            <option value="below_60" data-lang-key="ageBelow60">Below 60 years</option>
+                            <option value="60_to_80" data-lang-key="age60to80">60 to 79 years</option>
+                            <option value="above_80" data-lang-key="ageAbove80">80 years and above</option>
+                        </select>
+                    </div>
+
+                     <div class="form-group">
+                        <label for="taxRegime" data-lang-key="taxRegimeLabel">
+                            Preferred Tax Regime
+                            <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="taxRegimeTooltip">Choose your preferred regime. The calculator will suggest the better option based on tax liability. New Regime is default for FY 2024-25 unless opted out.</span></span>
+                        </label>
+                        <select id="taxRegime">
+                            <option value="new" data-lang-key="regimeNew">New Regime (Default)</option>
+                            <option value="old" data-lang-key="regimeOld">Old Regime</option>
+                        </select>
+                    </div>
+
+                     <div class="form-group">
+                        <label for="isSalaried" data-lang-key="isSalariedLabel">
+                            Are you Salaried/Pensioner?
+                             <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="isSalariedTooltip">Required for applying the Standard Deduction of ₹50,000 (available under both regimes for FY 2024-25).</span></span>
+                        </label>
+                        <select id="isSalaried">
+                            <option value="yes" data-lang-key="yes">Yes</option>
+                            <option value="no" data-lang-key="no">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3 data-lang-key="deductionsTitle" style="margin-top: 1.5rem; font-size: 1.1rem; color: var(--muted-text);">Deductions Claimed</h3>
+                 <div class="form-grid">
+                     <div class="form-group">
+                        <label for="deduction80C" data-lang-key="deduction80CLabel">
+                            Sec 80C (EPF, PPF, ELSS, etc.)
+                            <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="deduction80CTooltip">Total investment under 80C, 80CCC, 80CCD(1). Max limit ₹1,50,000. Primarily for Old Regime.</span></span>
+                        </label>
+                         <span class="input-prefix">₹</span>
+                        <input type="number" id="deduction80C" class="prefixed old-regime-input" placeholder="e.g., 150000" min="0" value="0">
+                    </div>
+
+                     <div class="form-group">
+                        <label for="deduction80D" data-lang-key="deduction80DLabel">
+                            Sec 80D (Medical Insurance)
+                            <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="deduction80DTooltip">Premium for self/family & parents. Limits depend on age. Primarily for Old Regime.</span></span>
+                        </label>
+                         <span class="input-prefix">₹</span>
+                        <input type="number" id="deduction80D" class="prefixed old-regime-input" placeholder="e.g., 25000" min="0" value="0">
+                    </div>
+
+                     <div class="form-group">
+                        <label for="deduction80G" data-lang-key="deduction80GLabel">
+                            Sec 80G (Donations)
+                             <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="deduction80GTooltip">Eligible donations (usually 50% or 100% deductible). Primarily for Old Regime. Enter the deductible amount.</span></span>
+                        </label>
+                         <span class="input-prefix">₹</span>
+                        <input type="number" id="deduction80G" class="prefixed old-regime-input" placeholder="e.g., 10000" min="0" value="0">
+                    </div>
+
+                     <div class="form-group">
+                        <label for="hraExemption" data-lang-key="hraExemptionLabel">
+                           HRA Exemption Claimed
+                            <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="hraExemptionTooltip">Enter the calculated HRA exemption amount. Available only under Old Regime. Requires separate calculation based on salary, rent, etc.</span></span>
+                        </label>
+                        <span class="input-prefix">₹</span>
+                        <input type="number" id="hraExemption" class="prefixed old-regime-input" placeholder="e.g., 50000" min="0" value="0">
+                    </div>
+
+                     <div class="form-group">
+                        <label for="homeLoanInterest" data-lang-key="homeLoanInterestLabel">
+                            Home Loan Interest (Sec 24b)
+                             <span class="tooltip-icon">?<span class="tooltip-text" data-lang-key="homeLoanInterestTooltip">Interest paid on housing loan for self-occupied property. Max ₹2,00,000. Available only under Old Regime.</span></span>
+                        </label>
+                         <span class="input-prefix">₹</span>
+                        <input type="number" id="homeLoanInterest" class="prefixed old-regime-input" placeholder="e.g., 200000" min="0" value="0">
+                    </div>
+
+                     </div>
+                 <p id="deductionInfo" style="font-size: 0.85rem; color: var(--muted-text); margin-top: 1rem;" data-lang-key="deductionRegimeInfo">Note: Most deductions (80C, 80D, 80G, HRA, Home Loan Interest) are primarily available only under the Old Regime for FY 2024-25. Standard Deduction is available under both.</p>
+            </form>
+        </section>
+
+        <section id="output-section">
+            <h2 data-lang-key="resultsTitle">Calculation Results (FY 2024-25)</h2>
+
+            <div id="resultsDisplay">
+                <p id="calculationPrompt" data-lang-key="enterIncomePrompt">Please enter your annual income to see the calculation.</p>
+
+                <div id="detailedResults" style="display: none;">
+                     <div id="regimeSuggestion" data-lang-key="suggestionDefault">Calculating best regime...</div>
+
+                    <div class="output-grid">
+                        <div class="output-item">
+                            <h3 data-lang-key="grossIncomeTitle">Gross Total Income</h3>
+                            <div class="output-value neutral" id="outputGrossIncome">₹ 0</div>
+                        </div>
+                        <div class="output-item">
+                            <h3 data-lang-key="totalDeductionsTitle">Total Deductions (<span id="effectiveRegime">New</span> Regime)</h3>
+                            <div class="output-value neutral" id="outputTotalDeductions">₹ 0</div>
+                        </div>
+                         <div class="output-item">
+                            <h3 data-lang-key="taxableIncomeTitle">Net Taxable Income (<span id="effectiveRegime2">New</span> Regime)</h3>
+                            <div class="output-value neutral" id="outputTaxableIncome">₹ 0</div>
+                        </div>
+
+                        <div class="output-item">
+                            <h3 data-lang-key="incomeTaxTitle">Income Tax (<span id="effectiveRegime3">New</span> Regime)</h3>
+                            <div class="output-value neutral" id="outputIncomeTax">₹ 0</div>
+                             <div class="tax-breakdown" id="outputTaxBreakdown">
+                                 <p data-lang-key="slabDetailDefault">Slab details appear here.</p>
+                             </div>
+                        </div>
+                         <div class="output-item">
+                            <h3 data-lang-key="surchargeTitle">Surcharge (<span id="effectiveRegime4">New</span> Regime)</h3>
+                            <div class="output-value neutral" id="outputSurcharge">₹ 0</div>
+                        </div>
+                        <div class="output-item">
+                            <h3 data-lang-key="cessTitle">Health & Education Cess (4%)</h3>
+                            <div class="output-value neutral" id="outputCess">₹ 0</div>
+                        </div>
+                        <div class="output-item">
+                            <h3 data-lang-key="rebateTitle">Rebate u/s 87A</h3>
+                            <div class="output-value negative" id="outputRebate">₹ 0</div>
+                        </div>
+                        <div class="output-item">
+                            <h3 data-lang-key="totalTaxPayableTitle">Total Tax Payable (<span id="effectiveRegime5">New</span> Regime)</h3>
+                            <div class="output-value positive" id="outputTotalTax">₹ 0</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div id="errorMessages" style="color: var(--danger-color); margin-top: 1rem; font-weight: bold;"></div>
+        </section>
+
+         <section id="chart-section">
+            <h2 data-lang-key="chartTitle">Tax Comparison Chart</h2>
+             <div id="taxChartContainer">
+                 <svg id="taxChart" viewBox="0 0 300 250" preserveAspectRatio="xMidYMid meet">
+                     <text x="150" y="125" text-anchor="middle" fill="var(--muted-text)" data-lang-key="chartPrompt">Enter income to view chart</text>
+                 </svg>
+             </div>
+             <div id="chartLegend" style="text-align: center; margin-top: 10px; font-size: 0.9rem;">
+                <span style="display: inline-block; width: 12px; height: 12px; background-color: var(--chart-bar-old); margin-right: 5px; vertical-align: middle;"></span> <span data-lang-key="regimeOld">Old Regime Tax</span>
+                <span style="display: inline-block; width: 12px; height: 12px; background-color: var(--chart-bar-new); margin-left: 15px; margin-right: 5px; vertical-align: middle;"></span> <span data-lang-key="regimeNew">New Regime Tax</span>
+             </div>
+        </section>
+
+
+        <section id="actions-section">
+             <button id="downloadPdfBtn" class="action-button" disabled>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                </svg>
+                 <span data-lang-key="downloadBtn">Download Report (PDF)</span>
+             </button>
+        </section>
+
+        <div id="print-report-content" style="display:none;">
+            <h1 data-lang-key="printReportTitle">Income Tax Calculation Report (FY 2024-25)</h1>
+             <div id="print-inputs"></div>
+             <div id="print-results"></div>
+             <div id="print-suggestion"></div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p><span data-lang-key="disclaimer">Disclaimer:</span> <span data-lang-key="disclaimerText">This calculator is for informational purposes only. Consult a qualified tax professional for accurate advice based on your specific situation. Tax rules are for FY 2024-25 (AY 2025-26) and subject to change.</span></p>
+         <p style="margin-top: 0.5rem;">&copy; <span id="currentYear"></span> Your Name/Brand (if any)</p>
+    </footer>
+
+    <script>
+        // --- Polyfills/Helpers (Minimal) ---
+        // Helper for number formatting
+        const formatCurrency = (num) => {
+            if (isNaN(num)) return '₹ 0';
+            const absNum = Math.abs(num);
+            const formatted = absNum.toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            });
+            return (num < 0 ? '-' : '') + formatted.replace('₹', '₹ '); // Add space after symbol
+        };
+
+        // --- Translations ---
+        const translations = {
+            en: {
+                // Titles & Labels
+                title: "Indian Income Tax Calculator (FY 2024-25)",
+                mainTitle: "🇮🇳 Indian Income Tax Calculator (FY 2024-25)",
+                inputTitle: "Enter Your Details",
+                resultsTitle: "Calculation Results (FY 2024-25)",
+                chartTitle: "Tax Comparison Chart",
+                deductionsTitle: "Deductions Claimed",
+                financialYearLabel: "Financial Year:",
+                annualIncomeLabel: "Total Annual Income",
+                annualIncomeTooltip: "Enter your gross annual income from all sources (Salary, Business, Other Sources) before any deductions. Standard Deduction will be applied automatically where applicable.",
+                ageGroupLabel: "Age Group",
+                ageGroupTooltip: "Tax slabs differ based on age only in the Old Regime. Below 60 (Normal), 60-79 (Senior Citizen), 80+ (Super Senior Citizen).",
+                ageBelow60: "Below 60 years",
+                age60to80: "60 to 79 years",
+                ageAbove80: "80 years and above",
+                taxRegimeLabel: "Preferred Tax Regime",
+                taxRegimeTooltip: "Choose your preferred regime. The calculator will suggest the better option based on tax liability. New Regime is default for FY 2024-25 unless opted out.",
+                regimeNew: "New Regime (Default)",
+                regimeOld: "Old Regime",
+                isSalariedLabel: "Are you Salaried/Pensioner?",
+                isSalariedTooltip: "Required for applying the Standard Deduction of ₹50,000 (available under both regimes for FY 2024-25).",
+                yes: "Yes",
+                no: "No",
+                deduction80CLabel: "Sec 80C (EPF, PPF, ELSS, etc.)",
+                deduction80CTooltip: "Total investment under 80C, 80CCC, 80CCD(1). Max limit ₹1,50,000. Primarily for Old Regime.",
+                deduction80DLabel: "Sec 80D (Medical Insurance)",
+                deduction80DTooltip: "Premium for self/family & parents. Limits depend on age. Primarily for Old Regime.",
+                deduction80GLabel: "Sec 80G (Donations)",
+                deduction80GTooltip: "Eligible donations (usually 50% or 100% deductible). Primarily for Old Regime. Enter the deductible amount.",
+                hraExemptionLabel: "HRA Exemption Claimed",
+                hraExemptionTooltip: "Enter the calculated HRA exemption amount. Available only under Old Regime. Requires separate calculation based on salary, rent, etc.",
+                homeLoanInterestLabel: "Home Loan Interest (Sec 24b)",
+                homeLoanInterestTooltip: "Interest paid on housing loan for self-occupied property. Max ₹2,00,000. Available only under Old Regime.",
+                deductionRegimeInfo: "Note: Most deductions (80C, 80D, 80G, HRA, Home Loan Interest) are primarily available only under the Old Regime for FY 2024-25. Standard Deduction is available under both.",
+                 // Output Area
+                enterIncomePrompt: "Please enter your annual income to see the calculation.",
+                suggestionDefault: "Calculating best regime...",
+                grossIncomeTitle: "Gross Total Income",
+                totalDeductionsTitle: "Total Deductions",
+                taxableIncomeTitle: "Net Taxable Income",
+                incomeTaxTitle: "Income Tax",
+                surchargeTitle: "Surcharge",
+                cessTitle: "Health & Education Cess (4%)",
+                rebateTitle: "Rebate u/s 87A",
+                totalTaxPayableTitle: "Total Tax Payable",
+                slabDetailDefault: "Slab details appear here.",
+                regime: "Regime", // Used in parentheses like (Old Regime)
+                 suggestionNewBetter: "✅ The New Regime seems beneficial, saving you approx.",
+                suggestionOldBetter: "✅ The Old Regime seems beneficial, saving you approx.",
+                suggestionEqual: "⚖️ Both regimes result in the same tax liability.",
+                suggestionComparedTo: "compared to the",
+                // Chart
+                 chartPrompt: "Enter income to view chart",
+                // Buttons & Footer
+                 toggleTheme: "🌙 Dark Mode",
+                 toggleThemeLight: "☀️ Light Mode",
+                downloadBtn: "Download Report (PDF)",
+                printReportTitle: "Income Tax Calculation Report (FY 2024-25)",
+                disclaimer: "Disclaimer:",
+                disclaimerText: "This calculator is for informational purposes only. Consult a qualified tax professional for accurate advice based on your specific situation. Tax rules are for FY 2024-25 (AY 2025-26) and subject to change.",
+                // Error Messages
+                errorInvalidInput: "Please enter valid positive numbers for income and deductions.",
+                errorNegativeResult: "Calculation resulted in negative values, please check inputs.",
+            },
+            hi: {
+                // Titles & Labels
+                title: "भारतीय आयकर कैलकुलेटर (वित्त वर्ष 2024-25)",
+                mainTitle: "🇮🇳 भारतीय आयकर कैलकुलेटर (वित्त वर्ष 2024-25)",
+                inputTitle: "अपना विवरण दर्ज करें",
+                resultsTitle: "गणना परिणाम (वित्त वर्ष 2024-25)",
+                chartTitle: "कर तुलना चार्ट",
+                deductionsTitle: "कटौतियों का दावा किया गया",
+                financialYearLabel: "वित्तीय वर्ष:",
+                annualIncomeLabel: "कुल वार्षिक आय",
+                annualIncomeTooltip: "सभी स्रोतों (वेतन, व्यवसाय, अन्य स्रोत) से अपनी सकल वार्षिक आय दर्ज करें, किसी भी कटौती से पहले। मानक कटौती जहाँ लागू हो, स्वचालित रूप से लागू की जाएगी।",
+                ageGroupLabel: "आयु समूह",
+                ageGroupTooltip: "कर स्लैब केवल पुरानी व्यवस्था में आयु के आधार पर भिन्न होते हैं। 60 से नीचे (सामान्य), 60-79 (वरिष्ठ नागरिक), 80+ (सुपर वरिष्ठ नागरिक)।",
+                ageBelow60: "60 वर्ष से कम",
+                age60to80: "60 से 79 वर्ष",
+                ageAbove80: "80 वर्ष और उससे अधिक",
+                taxRegimeLabel: "पसंदीदा कर व्यवस्था",
+                taxRegimeTooltip: "अपनी पसंदीदा व्यवस्था चुनें। कैलकुलेटर कर देयता के आधार पर बेहतर विकल्प सुझाएगा। वित्त वर्ष 2024-25 के लिए नई व्यवस्था डिफ़ॉल्ट है जब तक कि ऑप्ट आउट न किया जाए।",
+                regimeNew: "नई व्यवस्था (डिफ़ॉल्ट)",
+                regimeOld: "पुरानी व्यवस्था",
+                isSalariedLabel: "क्या आप वेतनभोगी/पेंशनभोगी हैं?",
+                 isSalariedTooltip: "₹50,000 की मानक कटौती लागू करने के लिए आवश्यक (वित्त वर्ष 2024-25 के लिए दोनों व्यवस्थाओं के तहत उपलब्ध)।",
+                yes: "हाँ",
+                no: "नहीं",
+                deduction80CLabel: "धारा 80C (EPF, PPF, ELSS, आदि)",
+                deduction80CTooltip: "80C, 80CCC, 80CCD(1) के तहत कुल निवेश। अधिकतम सीमा ₹1,50,000। मुख्य रूप से पुरानी व्यवस्था के लिए।",
+                deduction80DLabel: "धारा 80D (चिकित्सा बीमा)",
+                deduction80DTooltip: "स्वयं/परिवार और माता-पिता के लिए प्रीमियम। सीमाएं उम्र पर निर्भर करती हैं। मुख्य रूप से पुरानी व्यवस्था के लिए।",
+                deduction80GLabel: "धारा 80G (दान)",
+                deduction80GTooltip: "पात्र दान (आमतौर पर 50% या 100% कटौती योग्य)। मुख्य रूप से पुरानी व्यवस्था के लिए। कटौती योग्य राशि दर्ज करें।",
+                hraExemptionLabel: "एचआरए छूट का दावा किया गया",
+                hraExemptionTooltip: "गणना की गई एचआरए छूट राशि दर्ज करें। केवल पुरानी व्यवस्था के तहत उपलब्ध है। वेतन, किराए आदि के आधार पर अलग गणना की आवश्यकता है।",
+                homeLoanInterestLabel: "गृह ऋण ब्याज (धारा 24बी)",
+                homeLoanInterestTooltip: "स्व-अधिकृत संपत्ति के लिए आवास ऋण पर भुगतान किया गया ब्याज। अधिकतम ₹2,00,000। केवल पुरानी व्यवस्था के तहत उपलब्ध है।",
+                deductionRegimeInfo: "ध्यान दें: अधिकांश कटौतियाँ (80C, 80D, 80G, HRA, गृह ऋण ब्याज) वित्त वर्ष 2024-25 के लिए मुख्य रूप से केवल पुरानी व्यवस्था के तहत उपलब्ध हैं। मानक कटौती दोनों के तहत उपलब्ध है।",
+                 // Output Area
+                enterIncomePrompt: "गणना देखने के लिए कृपया अपनी वार्षिक आय दर्ज करें।",
+                suggestionDefault: "सर्वोत्तम व्यवस्था की गणना की जा रही है...",
+                grossIncomeTitle: "सकल कुल आय",
+                totalDeductionsTitle: "कुल कटौतियाँ",
+                taxableIncomeTitle: "शुद्ध कर योग्य आय",
+                incomeTaxTitle: "आयकर",
+                surchargeTitle: "अधिभार",
+                cessTitle: "स्वास्थ्य और शिक्षा उपकर (4%)",
+                rebateTitle: "छूट धारा 87A",
+                totalTaxPayableTitle: "कुल देय कर",
+                slabDetailDefault: "स्लैब विवरण यहाँ दिखाई देंगे।",
+                regime: "व्यवस्था", // Parentheses like (पुरानी व्यवस्था)
+                 suggestionNewBetter: "✅ नई व्यवस्था फायदेमंद लगती है, जिससे आपकी लगभग बचत होती है",
+                suggestionOldBetter: "✅ पुरानी व्यवस्था फायदेमंद लगती है, जिससे आपकी लगभग बचत होती है",
+                suggestionEqual: "⚖️ दोनों व्यवस्थाओं के परिणामस्वरूप समान कर देयता होती है।",
+                suggestionComparedTo: "की तुलना में",
+                 // Chart
+                 chartPrompt: "चार्ट देखने के लिए आय दर्ज करें",
+                // Buttons & Footer
+                 toggleTheme: "🌙 डार्क मोड",
+                 toggleThemeLight: "☀️ लाइट मोड",
+                downloadBtn: "रिपोर्ट डाउनलोड करें (PDF)",
+                printReportTitle: "आयकर गणना रिपोर्ट (वित्त वर्ष 2024-25)",
+                disclaimer: "अस्वीकरण:",
+                disclaimerText: "यह कैलकुलेटर केवल सूचनात्मक उद्देश्यों के लिए है। अपनी विशिष्ट स्थिति के आधार पर सटीक सलाह के लिए योग्य कर पेशेवर से परामर्श लें। कर नियम वित्त वर्ष 2024-25 (AY 2025-26) के लिए हैं और परिवर्तन के अधीन हैं।",
+                 // Error Messages
+                 errorInvalidInput: "कृपया आय और कटौतियों के लिए मान्य सकारात्मक संख्याएँ दर्ज करें।",
+                 errorNegativeResult: "गणना के परिणामस्वरूप नकारात्मक मान आए, कृपया इनपुट जांचें।",
+            }
+        };
+        let currentLang = 'en';
+
+        // --- DOM Elements ---
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // Inputs
+        const annualIncomeInput = $('#annualIncome');
+        const ageGroupSelect = $('#ageGroup');
+        const taxRegimeSelect = $('#taxRegime');
+        const isSalariedSelect = $('#isSalaried');
+        const deduction80CInput = $('#deduction80C');
+        const deduction80DInput = $('#deduction80D');
+        const deduction80GInput = $('#deduction80G');
+        const hraExemptionInput = $('#hraExemption');
+        const homeLoanInterestInput = $('#homeLoanInterest');
+        const financialYearSelect = $('#financialYear'); // Added
+
+        // Outputs
+        const resultsDisplay = $('#resultsDisplay');
+        const calculationPrompt = $('#calculationPrompt');
+        const detailedResults = $('#detailedResults');
+        const outputGrossIncome = $('#outputGrossIncome');
+        const outputTotalDeductions = $('#outputTotalDeductions');
+        const outputTaxableIncome = $('#outputTaxableIncome');
+        const outputIncomeTax = $('#outputIncomeTax');
+        const outputTaxBreakdown = $('#outputTaxBreakdown');
+        const outputSurcharge = $('#outputSurcharge');
+        const outputCess = $('#outputCess');
+        const outputRebate = $('#outputRebate');
+        const outputTotalTax = $('#outputTotalTax');
+        const regimeSuggestion = $('#regimeSuggestion');
+        const effectiveRegimeSpans = $$('[id^="effectiveRegime"]'); // Select all spans needing regime update
+        const errorMessages = $('#errorMessages');
+
+        // Controls
+        const darkModeToggle = $('#darkModeToggle');
+        const languageSelector = $('#languageSelector');
+        const downloadPdfBtn = $('#downloadPdfBtn');
+
+        // Chart
+        const taxChart = $('#taxChart');
+        const taxChartContainer = $('#taxChartContainer');
+
+        // Constants for FY 2024-25 (AY 2025-26)
+        const STANDARD_DEDUCTION = 50000;
+        const CESS_RATE = 0.04;
+
+        // Old Regime Constants
+        const OLD_REGIME_REBATE_LIMIT = 500000;
+        const OLD_REGIME_REBATE_AMOUNT = 12500;
+        const SEC_80C_LIMIT = 150000;
+        // Note: 80D limits are complex (depend on age of self/parents), using input directly.
+        const HOME_LOAN_INTEREST_LIMIT = 200000;
+
+        // New Regime (FY 2024-25 u/s 115BAC) Constants
+        const NEW_REGIME_REBATE_LIMIT = 700000;
+        // Rebate makes tax zero if income <= 7L. Max implicit rebate is 25000.
+
+
+        // --- Core Calculation Logic ---
+
+        function getSlabRates(regime, ageGroup) {
+             // FY 2024-25 (AY 2025-26)
+            if (regime === 'new') {
+                return [
+                    { limit: 300000, rate: 0.00 },
+                    { limit: 600000, rate: 0.05 },
+                    { limit: 900000, rate: 0.10 },
+                    { limit: 1200000, rate: 0.15 },
+                    { limit: 1500000, rate: 0.20 },
+                    { limit: Infinity, rate: 0.30 }
+                ];
+            } else { // Old Regime
+                if (ageGroup === 'above_80') { // Super Senior Citizen
+                    return [
+                        { limit: 500000, rate: 0.00 },
+                        { limit: 1000000, rate: 0.20 },
+                        { limit: Infinity, rate: 0.30 }
+                    ];
+                } else if (ageGroup === '60_to_80') { // Senior Citizen
+                     return [
+                        { limit: 300000, rate: 0.00 },
+                        { limit: 500000, rate: 0.05 },
+                        { limit: 1000000, rate: 0.20 },
+                        { limit: Infinity, rate: 0.30 }
+                    ];
+                } else { // Below 60
+                    return [
+                        { limit: 250000, rate: 0.00 },
+                        { limit: 500000, rate: 0.05 },
+                        { limit: 1000000, rate: 0.20 },
+                        { limit: Infinity, rate: 0.30 }
+                    ];
+                }
+            }
+        }
+
+        function calculateSlabTax(taxableIncome, slabs) {
+            let tax = 0;
+            let remainingIncome = taxableIncome;
+            let previousLimit = 0;
+            let breakdownHtml = '<table><thead><tr><th>Slab</th><th>Tax Rate</th><th>Tax Amount</th></tr></thead><tbody>';
+
+            for (const slab of slabs) {
+                if (remainingIncome <= 0) break;
+
+                const slabLimit = slab.limit - previousLimit;
+                const taxableInSlab = Math.min(remainingIncome, slabLimit);
+                const taxInSlab = taxableInSlab * slab.rate;
+                tax += taxInSlab;
+
+                 // Add to breakdown
+                 const slabRange = previousLimit === 0
+                     ? `Up to ${formatCurrency(slab.limit)}`
+                     : slab.limit === Infinity
+                     ? `Above ${formatCurrency(previousLimit)}`
+                     : `${formatCurrency(previousLimit + 1)} - ${formatCurrency(slab.limit)}`;
+
+                 if (taxableInSlab > 0) {
+                     breakdownHtml += `<tr><td>${slabRange}</td><td>${(slab.rate * 100).toFixed(0)}%</td><td>${formatCurrency(taxInSlab)}</td></tr>`;
+                 }
+
+                remainingIncome -= taxableInSlab;
+                previousLimit = slab.limit;
+                 if (previousLimit === Infinity) break; // Should not happen with Infinity check above but good practice
+            }
+             breakdownHtml += '</tbody></table>';
+             return { tax, breakdownHtml };
+        }
+
+        function calculateSurcharge(taxableIncome, taxWithoutSurcharge, regime) {
+             let surcharge = 0;
+             let surchargeRate = 0;
+
+             // FY 2024-25 Surcharge Rates
+             const thresholds = [5000000, 10000000, 20000000, 50000000]; // 50L, 1Cr, 2Cr, 5Cr
+             const ratesOld = [0.10, 0.15, 0.25, 0.37];
+             const ratesNew = [0.10, 0.15, 0.25, 0.25]; // Max 25% in New Regime
+
+             const rates = regime === 'new' ? ratesNew : ratesOld;
+
+            if (taxableIncome > thresholds[0]) {
+                 if (taxableIncome <= thresholds[1]) surchargeRate = rates[0];
+                 else if (taxableIncome <= thresholds[2]) surchargeRate = rates[1];
+                 else if (taxableIncome <= thresholds[3]) surchargeRate = rates[2];
+                 else surchargeRate = rates[3]; // Only applicable for Old regime > 5Cr
+
+                surcharge = taxWithoutSurcharge * surchargeRate;
+
+                // Marginal Relief Calculation (simplified: check if tax+surcharge > income_increase + tax_at_threshold)
+                // Find the lower threshold
+                 let lowerThreshold = 0;
+                 let lowerThresholdRate = 0;
+                 for(let i = thresholds.length - 1; i >= 0; i--) {
+                     if (taxableIncome > thresholds[i]) {
+                         lowerThreshold = thresholds[i];
+                         lowerThresholdRate = i > 0 ? rates[i-1] : 0;
+                         break;
+                     }
+                 }
+
+                 if(lowerThreshold > 0) {
+                     // Calculate tax at the exact lower threshold income (needs recalculation - simplified here)
+                     // A precise marginal relief check needs re-running tax calc at the threshold, which is complex.
+                     // Simplified check: Check if surcharge amount exceeds the income above threshold.
+                     const incomeIncrease = taxableIncome - lowerThreshold;
+                     // This is a common heuristic, though not the exact legal definition of marginal relief.
+                     // Proper calculation involves comparing (Tax + Surcharge at Current Income) vs (Tax + Surcharge at Threshold Income + Income Exceeding Threshold)
+                     // For simplicity, we'll stick to the calculated surcharge but acknowledge marginal relief exists.
+                     // Let's calculate the surcharge based on the rate and mention that marginal relief might apply.
+                     // Example: At 51L, surcharge is 10%. If tax was 13L, surcharge is 1.3L. Income increase is 1L. Surcharge > Income increase. Relief applies.
+                     // The actual relief limits the additional tax+surcharge liability to the amount of income exceeding the threshold.
+                     // Due to complexity, this calculator just applies the standard surcharge rate. User should be aware.
+                 }
+             }
+
+             return surcharge;
+        }
+
+
+        function calculateTax() {
+            clearErrors();
+            const income = parseFloat(annualIncomeInput.value) || 0;
+            const ageGroup = ageGroupSelect.value;
+            const preferredRegime = taxRegimeSelect.value;
+            const isSalaried = isSalariedSelect.value === 'yes';
+
+            // Get deductions (ensure they are numbers, default to 0)
+            const ded80C = Math.max(0, parseFloat(deduction80CInput.value) || 0);
+            const ded80D = Math.max(0, parseFloat(deduction80DInput.value) || 0);
+            const ded80G = Math.max(0, parseFloat(deduction80GInput.value) || 0);
+            const hraEx = Math.max(0, parseFloat(hraExemptionInput.value) || 0);
+            const homeLoanInt = Math.max(0, parseFloat(homeLoanInterestInput.value) || 0);
+
+
+            if (income < 0 || ded80C < 0 || ded80D < 0 || ded80G < 0 || hraEx < 0 || homeLoanInt < 0) {
+                 showError(translations[currentLang].errorInvalidInput);
+                 resetOutputs();
+                 return;
+            }
+
+            if (income === 0 && ded80C === 0 && ded80D === 0 && ded80G === 0 && hraEx === 0 && homeLoanInt === 0) {
+                 resetOutputs();
+                 calculationPrompt.style.display = 'block';
+                 detailedResults.style.display = 'none';
+                 downloadPdfBtn.disabled = true;
+                 updateChart(0, 0); // Clear chart
+                 return;
+            }
+
+            calculationPrompt.style.display = 'none';
+            detailedResults.style.display = 'block';
+            downloadPdfBtn.disabled = false;
+
+
+            // --- Calculate for BOTH Regimes ---
+            const results = {};
+
+             // Standard Deduction applicable amount
+             const applicableStdDed = isSalaried ? STANDARD_DEDUCTION : 0;
+
+             // --- Old Regime Calculation ---
+             let oldTaxableIncome = income;
+             let oldTotalDeductions = 0;
+
+             // 1. Standard Deduction
+             if (applicableStdDed > 0 && oldTaxableIncome >= applicableStdDed) {
+                 oldTaxableIncome -= applicableStdDed;
+                 oldTotalDeductions += applicableStdDed;
+             } else if (applicableStdDed > 0) {
+                  oldTotalDeductions += oldTaxableIncome;
+                 oldTaxableIncome = 0;
+            }
+
+            // 2. HRA Exemption
+            if (hraEx > 0 && oldTaxableIncome >= hraEx) {
+                 oldTaxableIncome -= hraEx;
+                 oldTotalDeductions += hraEx;
+            } else if (hraEx > 0) {
+                 oldTotalDeductions += oldTaxableIncome;
+                 oldTaxableIncome = 0;
+             }
+
+             // 3. Home Loan Interest (Sec 24b) - This reduces income under 'Income from House Property', effectively reducing Gross Total Income before Chapter VI-A
+             const actualHomeLoanDed = Math.min(homeLoanInt, HOME_LOAN_INTEREST_LIMIT);
+             if (actualHomeLoanDed > 0 && oldTaxableIncome >= actualHomeLoanDed) {
+                 oldTaxableIncome -= actualHomeLoanDed;
+                 // Note: Technically this is adjusted before GTI, but for calculator simplicity, we deduct here.
+                 // We add it to 'deductions' for display consistency, although it's not Chapter VI-A.
+                 oldTotalDeductions += actualHomeLoanDed;
+            } else if (actualHomeLoanDed > 0) {
+                 oldTotalDeductions += oldTaxableIncome;
+                 oldTaxableIncome = 0;
+             }
+
+             // Gross Total Income (after house property adjustments, before Chapter VI-A)
+             let grossTotalIncomeOld = oldTaxableIncome; // For 80G calculation if needed (based on Adjusted GTI)
+
+            // 4. Chapter VI-A Deductions
+             const actual80C = Math.min(ded80C, SEC_80C_LIMIT);
+             // Simplified 80D/80G - using entered amounts directly
+             const chapter6ADeductions = actual80C + ded80D + ded80G; // Add other Chapter VI-A deductions here if included
+
+             const finalChapter6ADed = Math.min(chapter6ADeductions, grossTotalIncomeOld); // Cannot exceed GTI
+
+             if (finalChapter6ADed > 0) {
+                 oldTaxableIncome -= finalChapter6ADed;
+                 oldTotalDeductions += finalChapter6ADed;
+             }
+
+             oldTaxableIncome = Math.max(0, oldTaxableIncome); // Ensure non-negative taxable income
+
+
+             // Calculate Tax (Old Regime)
+             const oldSlabs = getSlabRates('old', ageGroup);
+             const oldTaxCalc = calculateSlabTax(oldTaxableIncome, oldSlabs);
+             let oldTaxBeforeRebate = oldTaxCalc.tax;
+             let oldTaxBreakdownHtml = oldTaxCalc.breakdownHtml;
+
+            // Calculate Surcharge (Old Regime)
+             const oldSurcharge = calculateSurcharge(oldTaxableIncome, oldTaxBeforeRebate, 'old');
+             let oldTaxWithSurcharge = oldTaxBeforeRebate + oldSurcharge;
+
+             // Calculate Rebate (Old Regime)
+             let oldRebate = 0;
+             if (oldTaxableIncome <= OLD_REGIME_REBATE_LIMIT && oldTaxWithSurcharge > 0) {
+                 oldRebate = Math.min(oldTaxWithSurcharge, OLD_REGIME_REBATE_AMOUNT);
+             }
+             let oldTaxAfterRebate = oldTaxWithSurcharge - oldRebate;
+
+            // Calculate Cess (Old Regime)
+             const oldCess = oldTaxAfterRebate * CESS_RATE;
+
+             // Final Tax (Old Regime)
+             const oldFinalTax = oldTaxAfterRebate + oldCess;
+
+             results.old = {
+                 grossIncome: income,
+                 totalDeductions: oldTotalDeductions,
+                 taxableIncome: oldTaxableIncome,
+                 incomeTax: oldTaxBeforeRebate, // Tax before surcharge/rebate
+                 surcharge: oldSurcharge,
+                 cess: oldCess,
+                 rebate: oldRebate,
+                 finalTax: oldFinalTax,
+                 breakdownHtml: oldTaxBreakdownHtml
+             };
+
+
+             // --- New Regime Calculation (FY 2024-25 u/s 115BAC) ---
+             let newTaxableIncome = income;
+             let newTotalDeductions = 0;
+
+             // 1. Standard Deduction ONLY
+             if (applicableStdDed > 0 && newTaxableIncome >= applicableStdDed) {
+                 newTaxableIncome -= applicableStdDed;
+                 newTotalDeductions += applicableStdDed;
+             } else if (applicableStdDed > 0) {
+                 newTotalDeductions += newTaxableIncome;
+                 newTaxableIncome = 0;
+            }
+             // Other deductions (80C, 80D, 80G, HRA, Home Loan) generally NOT allowed. Add exceptions (like 80CCD(2)) if needed.
+
+             newTaxableIncome = Math.max(0, newTaxableIncome);
+
+             // Calculate Tax (New Regime)
+             const newSlabs = getSlabRates('new', ageGroup); // Age doesn't matter for New Regime slabs
+             const newTaxCalc = calculateSlabTax(newTaxableIncome, newSlabs);
+             let newTaxBeforeRebate = newTaxCalc.tax;
+             let newTaxBreakdownHtml = newTaxCalc.breakdownHtml;
+
+             // Calculate Surcharge (New Regime) - Max rate 25%
+              const newSurcharge = calculateSurcharge(newTaxableIncome, newTaxBeforeRebate, 'new');
+             let newTaxWithSurcharge = newTaxBeforeRebate + newSurcharge;
+
+
+             // Calculate Rebate (New Regime)
+             let newRebate = 0;
+             if (newTaxableIncome <= NEW_REGIME_REBATE_LIMIT && newTaxWithSurcharge > 0) {
+                 // For income <= 7L, tax becomes NIL. The rebate amount cancels out the calculated tax.
+                 newRebate = newTaxWithSurcharge;
+             }
+             let newTaxAfterRebate = newTaxWithSurcharge - newRebate;
+
+            // Calculate Cess (New Regime)
+             const newCess = newTaxAfterRebate * CESS_RATE;
+
+             // Final Tax (New Regime)
+             const newFinalTax = newTaxAfterRebate + newCess;
+
+             results.new = {
+                 grossIncome: income,
+                 totalDeductions: newTotalDeductions,
+                 taxableIncome: newTaxableIncome,
+                 incomeTax: newTaxBeforeRebate,
+                 surcharge: newSurcharge,
+                 cess: newCess,
+                 rebate: newRebate,
+                 finalTax: newFinalTax,
+                 breakdownHtml: newTaxBreakdownHtml
+             };
+
+
+             // --- Determine Better Regime & Display Results ---
+             let betterRegime = 'new'; // Default to new
+             let suggestionText = '';
+             const taxDiff = results.old.finalTax - results.new.finalTax;
+
+             if (Math.abs(taxDiff) < 1) { // Consider them equal if difference is negligible
+                betterRegime = preferredRegime; // Stick to preferred if equal
+                 suggestionText = `<span data-lang-key="suggestionEqual">${translations[currentLang].suggestionEqual}</span>`;
+                 regimeSuggestion.className = 'equal';
+             } else if (taxDiff > 0) { // Old tax is higher, New is better
+                 betterRegime = 'new';
+                 suggestionText = `<span data-lang-key="suggestionNewBetter">${translations[currentLang].suggestionNewBetter}</span> ${formatCurrency(taxDiff)} <span data-lang-key="suggestionComparedTo">${translations[currentLang].suggestionComparedTo}</span> <span data-lang-key="regimeOld">${translations[currentLang].regimeOld}</span>.`;
+                 regimeSuggestion.className = 'new';
+             } else { // New tax is higher, Old is better
+                 betterRegime = 'old';
+                 suggestionText = `<span data-lang-key="suggestionOldBetter">${translations[currentLang].suggestionOldBetter}</span> ${formatCurrency(Math.abs(taxDiff))} <span data-lang-key="suggestionComparedTo">${translations[currentLang].suggestionComparedTo}</span> <span data-lang-key="regimeNew">${translations[currentLang].regimeNew}</span>.`;
+                 regimeSuggestion.className = 'old';
+             }
+
+             // Display results based on the PREFERRED regime initially, but show suggestion
+             const displayRegime = preferredRegime; // The regime selected by the user
+             const displayResults = results[displayRegime];
+             const displayRegimeText = displayRegime === 'new' ? translations[currentLang].regimeNew : translations[currentLang].regimeOld;
+
+             outputGrossIncome.textContent = formatCurrency(displayResults.grossIncome);
+             outputTotalDeductions.textContent = formatCurrency(displayResults.totalDeductions);
+             outputTaxableIncome.textContent = formatCurrency(displayResults.taxableIncome);
+             outputIncomeTax.textContent = formatCurrency(displayResults.incomeTax);
+             outputSurcharge.textContent = formatCurrency(displayResults.surcharge);
+             outputCess.textContent = formatCurrency(displayResults.cess);
+             outputRebate.textContent = `- ${formatCurrency(displayResults.rebate)}`; // Show rebate as negative
+             outputTotalTax.textContent = formatCurrency(displayResults.finalTax);
+             outputTaxBreakdown.innerHTML = displayResults.breakdownHtml || `<p data-lang-key="slabDetailDefault">${translations[currentLang].slabDetailDefault}</p>`;
+
+             regimeSuggestion.innerHTML = suggestionText; // Display suggestion
+
+            // Update labels like "(New Regime)"
+            const regimeTextLabel = `(${displayRegimeText})`;
+            effectiveRegimeSpans.forEach(span => span.textContent = displayRegimeText);
+             $('[data-lang-key="totalDeductionsTitle"]').innerHTML = `${translations[currentLang].totalDeductionsTitle} ${regimeTextLabel}`;
+             $('[data-lang-key="taxableIncomeTitle"]').innerHTML = `${translations[currentLang].taxableIncomeTitle} ${regimeTextLabel}`;
+             $('[data-lang-key="incomeTaxTitle"]').innerHTML = `${translations[currentLang].incomeTaxTitle} ${regimeTextLabel}`;
+             $('[data-lang-key="surchargeTitle"]').innerHTML = `${translations[currentLang].surchargeTitle} ${regimeTextLabel}`;
+             $('[data-lang-key="totalTaxPayableTitle"]').innerHTML = `${translations[currentLang].totalTaxPayableTitle} ${regimeTextLabel}`;
+
+
+             // Update Chart
+             updateChart(results.old.finalTax, results.new.finalTax);
+
+             // Prepare Print Report (Optional: can enhance later if needed)
+             preparePrintReport(results, preferredRegime, betterRegime);
+        }
+
+        function resetOutputs() {
+            outputGrossIncome.textContent = '₹ 0';
+            outputTotalDeductions.textContent = '₹ 0';
+            outputTaxableIncome.textContent = '₹ 0';
+            outputIncomeTax.textContent = '₹ 0';
+            outputSurcharge.textContent = '₹ 0';
+            outputCess.textContent = '₹ 0';
+            outputRebate.textContent = '₹ 0';
+            outputTotalTax.textContent = '₹ 0';
+            outputTaxBreakdown.innerHTML = `<p data-lang-key="slabDetailDefault">${translations[currentLang].slabDetailDefault}</p>`;
+            regimeSuggestion.textContent = '';
+            regimeSuggestion.className = '';
+            detailedResults.style.display = 'none';
+            calculationPrompt.style.display = 'block';
+             calculationPrompt.textContent = translations[currentLang].enterIncomePrompt;
+             downloadPdfBtn.disabled = true;
+             updateChart(0, 0); // Clear chart
+             clearErrors();
+        }
+
+        function showError(message) {
+             errorMessages.textContent = message;
+             errorMessages.style.display = 'block';
+        }
+
+        function clearErrors() {
+            errorMessages.textContent = '';
+             errorMessages.style.display = 'none';
+        }
+
+         // --- Chart Update ---
+         function updateChart(oldTax, newTax) {
+            const maxTax = Math.max(oldTax, newTax, 1); // Avoid division by zero, ensure minimum height
+            const chartHeight = 200; // Effective drawing height within SVG
+            const chartWidth = 300;
+            const barWidth = 80;
+            const spacing = 60;
+
+            const oldBarHeight = (oldTax / maxTax) * chartHeight;
+            const newBarHeight = (newTax / maxTax) * chartHeight;
+
+            const oldX = (chartWidth / 2) - spacing / 2 - barWidth;
+            const newX = (chartWidth / 2) + spacing / 2;
+
+            taxChart.innerHTML = `
+                 <defs>
+                    <linearGradient id="oldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--chart-bar-old); stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:var(--chart-bar-old); stop-opacity:1" />
+                    </linearGradient>
+                     <linearGradient id="newGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--chart-bar-new); stop-opacity:0.8" />
+                        <stop offset="100%" style="stop-color:var(--chart-bar-new); stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+
+                <line x1="30" y1="20" x2="30" y2="${chartHeight + 20}" class="chart-axis" />
+                <line x1="30" y1="${chartHeight + 20}" x2="${chartWidth - 10}" y2="${chartHeight + 20}" class="chart-axis" />
+
+                <rect class="chart-bar old" x="${oldX}" y="${chartHeight + 20 - oldBarHeight}" width="${barWidth}" height="${oldBarHeight}" fill="url(#oldGradient)">
+                     <title>${translations[currentLang].regimeOld}: ${formatCurrency(oldTax)}</title>
+                 </rect>
+                <text class="chart-text" x="${oldX + barWidth / 2}" y="${chartHeight + 35}">${translations[currentLang].regimeOld}</text>
+                 <text class="chart-text" x="${oldX + barWidth / 2}" y="${chartHeight + 15 - oldBarHeight}" dy="-5">${formatCurrency(oldTax)}</text>
+
+                <rect class="chart-bar new" x="${newX}" y="${chartHeight + 20 - newBarHeight}" width="${barWidth}" height="${newBarHeight}" fill="url(#newGradient)">
+                     <title>${translations[currentLang].regimeNew}: ${formatCurrency(newTax)}</title>
+                 </rect>
+                <text class="chart-text" x="${newX + barWidth / 2}" y="${chartHeight + 35}">${translations[currentLang].regimeNew}</text>
+                 <text class="chart-text" x="${newX + barWidth / 2}" y="${chartHeight + 15 - newBarHeight}" dy="-5">${formatCurrency(newTax)}</text>
+
+                 <text class="chart-text" x="25" y="25" text-anchor="end">${formatCurrency(maxTax)}</text>
+                  <text class="chart-text" x="25" y="${chartHeight + 20}" text-anchor="end">₹ 0</text>
+            `;
+
+            // If income is zero, show prompt instead
+            if (oldTax === 0 && newTax === 0 && (parseFloat(annualIncomeInput.value) || 0) === 0) {
+                 taxChart.innerHTML = `<text x="150" y="125" text-anchor="middle" fill="var(--muted-text)" data-lang-key="chartPrompt">${translations[currentLang].chartPrompt}</text>`;
+            }
+         }
+
+        // --- Dark Mode ---
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                darkModeToggle.textContent = translations[currentLang].toggleThemeLight; // Show Light mode option
+                 darkModeToggle.setAttribute('data-lang-key', 'toggleThemeLight');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                darkModeToggle.textContent = translations[currentLang].toggleTheme; // Show Dark mode option
+                 darkModeToggle.setAttribute('data-lang-key', 'toggleTheme');
+            }
+        }
+
+        function toggleDarkMode() {
+            const currentTheme = document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+            // Re-render chart if needed as colors might change via CSS vars
+            calculateTax();
+        }
+
+        // --- Language Switching ---
+        function switchLanguage(lang) {
+            if (!translations[lang]) return;
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            document.documentElement.lang = lang; // Update html lang attribute
+
+            $$('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                         // Handle placeholders if needed, e.g., el.placeholder = translations[lang][key];
+                         // Tooltips are inside spans, handle them directly
+                         if (el.classList.contains('tooltip-text')) {
+                              el.textContent = translations[lang][key];
+                         }
+                     } else if (el.tagName === 'OPTION') {
+                         el.textContent = translations[lang][key];
+                    }
+                    else {
+                        // Handle elements containing text (h1, h2, label, button, p, span, title, etc.)
+                        // Preserve child elements like tooltip icons if they exist within labels
+                         let currentContent = '';
+                         if (key === 'annualIncomeLabel' || key === 'ageGroupLabel' || key === 'taxRegimeLabel' || key === 'isSalariedLabel' || key === 'deduction80CLabel' || key === 'deduction80DLabel' || key === 'deduction80GLabel' || key === 'hraExemptionLabel' || key === 'homeLoanInterestLabel' ) {
+                             // Special handling for labels with tooltips
+                             const tooltipIcon = el.querySelector('.tooltip-icon');
+                             currentContent = translations[lang][key] + (tooltipIcon ? ' ' + tooltipIcon.outerHTML : '');
+                         } else {
+                             currentContent = translations[lang][key];
+                         }
+                        el.innerHTML = currentContent; // Use innerHTML carefully, ensure no script injection risk (keys are controlled)
+                    }
+                 }
+             });
+
+             // Update Dark Mode button text specifically
+             const currentTheme = localStorage.getItem('theme') || 'light';
+             darkModeToggle.textContent = currentTheme === 'dark'
+                 ? translations[currentLang].toggleThemeLight
+                 : translations[currentLang].toggleTheme;
+
+             // Recalculate to update output text if results are visible
+             if (detailedResults.style.display !== 'none') {
+                 calculateTax();
+             } else {
+                  resetOutputs(); // Ensure prompt is translated
+             }
+        }
+
+         // --- PDF Download (Print) ---
+        function preparePrintReport(results, preferredRegime, betterRegime) {
+             // This function could populate a hidden div #print-report-content
+             // with a structured version of the inputs and results for better print layout control.
+             // However, the @media print styles target the main sections directly, which is often simpler.
+             // Example of populating a hidden div (if needed):
+            /*
+            const printInputs = $('#print-inputs');
+            const printResults = $('#print-results');
+            const printSuggestion = $('#print-suggestion');
+
+            printInputs.innerHTML = `<h3>Inputs</h3><p>Income: ${formatCurrency(results[preferredRegime].grossIncome)}</p> ... etc`;
+             printResults.innerHTML = `<h3>Results (${preferredRegime})</h3><p>Taxable Income: ${formatCurrency(results[preferredRegime].taxableIncome)}</p> ... etc`;
+             printSuggestion.innerHTML = regimeSuggestion.innerHTML; // Copy the suggestion
+            */
+             // For now, rely on @media print styles applied to the visible sections.
+        }
+
+        function downloadPDF() {
+            // Prepare the report content just before printing (ensure data is current)
+             // calculateTax(); // Re-run calc might be needed if inputs changed without focusout
+             // preparePrintReport(...); // Populate hidden div if using that method
+
+            // Use browser's print functionality
+             window.print();
+        }
+
+        // --- Event Listeners ---
+        const inputsToWatch = [
+            annualIncomeInput, ageGroupSelect, taxRegimeSelect, isSalariedSelect,
+            deduction80CInput, deduction80DInput, deduction80GInput,
+            hraExemptionInput, homeLoanInterestInput, financialYearSelect
+        ];
+
+        inputsToWatch.forEach(input => {
+            input.addEventListener('input', calculateTax); // Real-time update
+             input.addEventListener('change', calculateTax); // Ensure dropdown changes trigger calc
+        });
+
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        languageSelector.addEventListener('change', (e) => switchLanguage(e.target.value));
+        downloadPdfBtn.addEventListener('click', downloadPDF);
+
+        // Toggle deduction input enablement based on regime (Visual Cue)
+         taxRegimeSelect.addEventListener('change', () => {
+             const isOldRegime = taxRegimeSelect.value === 'old';
+             $$('.old-regime-input').forEach(input => {
+                 input.disabled = !isOldRegime;
+                 input.style.opacity = isOldRegime ? '1' : '0.6';
+                 input.style.cursor = isOldRime ? 'text' : 'not-allowed';
+             });
+              $('#deductionInfo').style.display = 'block'; // Always show the info note
+         });
+
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             // Set current year in footer
+             $('#currentYear').textContent = new Date().getFullYear();
+
+             // Load saved language or default to 'en'
+             const savedLang = localStorage.getItem('language');
+             if (savedLang && translations[savedLang]) {
+                 languageSelector.value = savedLang;
+                 switchLanguage(savedLang);
+             } else {
+                 switchLanguage('en'); // Default
+             }
+
+             // Load saved theme or default to 'light'
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+            // Initial state for deduction inputs
+             taxRegimeSelect.dispatchEvent(new Event('change')); // Trigger enablement logic
+
+             // Initial calculation if needed (e.g., if form has default values)
+             // calculateTax(); // Optional: Calculate on load if you have initial values
+             resetOutputs(); // Start with prompt
+
+        });
+
+    </script>
+</body>
+</html>
